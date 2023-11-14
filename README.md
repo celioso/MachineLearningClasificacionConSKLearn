@@ -1,2 +1,1 @@
-# MachineLearningClasificacionConSKLearn
-Machine Learning clasificación con SKLearn
+# Machine Learning clasificación con SKLearn
