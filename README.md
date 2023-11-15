@@ -23,3 +23,5 @@ Para restaurar el notebook, puede ser que sea necesario realizar nuevamente uplo
 ¿Se puede utilizar otro ambiente para este curso? **¡Claro!** Por ejemplo, si quieres utilizar el ambiente Anaconda, visto anteriormente en el curso de pandas, puedes hacerlo.
 
 **¡Empecemos!**
+
+Clase de hoy
