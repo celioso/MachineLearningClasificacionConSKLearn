@@ -117,3 +117,123 @@ En esta lección aprendimos a:
 ### Preparando el ambiente
 
 Para que puedas desarrollar tus ejercicios, aquí te dejo la url del [dataset](https://gist.githubusercontent.com/ahcamachod/38673f75b54ec62ffc290eff8e7c716e/raw/6eaa07e199d9f668bf94a034cb84dac58c82fa4f/tracking.csv "dataset") que utilizaremos durante el aula.
+
+### Haga lo que hicimos
+
+Llegó la hora de poner en práctica todo lo aprendido en esta lección. Es importante que implementes todo lo que fue visto hasta ahora para continuar con la próxima lección (si ya lo has hecho, ¡excelente!). Implementar lo visto hasta ahora te ayudará a seguir aprendiendo y te dejará más preparado para lo que viene en los próximos videos. En caso de que ya domines esta parte, al final de cada lección podrás descargar el proyecto hasta lo último visto en clase.
+
+1. Iniciaremos un nuevo proyecto. Vamos a importar nuestro dataset directamente desde internet. Digita y ejecuta:
+
+```python
+import pandas as pd
+uri = 'https://gist.githubusercontent.com/ahcamachod/38673f75b54ec62ffc290eff8e7c716e/raw/6eaa07e199d9f668bf94a034cb84dac58c82fa4f/tracking.csv'
+datos = pd.read_csv(uri)
+datos.sample(5)
+```
+
+2. Ahora, vamos a cambiar los nombres de las columnas para que nuestros atributos queden escritos en español. Al final traeremos una muestra del dataset con 3 registros:
+```python
+mapa = {
+          "home":"principal",
+          "how_it_works":"como_funciona",
+          "contact":"contacto",
+          "bought":"compro"
+        }
+
+datos = datos.rename(columns=mapa)
+datos.sample(3)
+```
+
+3. Vamos a separar nuestros atributos de nuestra clasificación. Para ello digita y ejecuta:
+
+```python
+x = datos[['principal','como_funciona','contacto']]
+y = datos.compro
+```
+
+4. Veremos la forma de nuestro dataset completo antes de separar nuestra base de datos para entrenamiento y para pruebas:
+```python
+datos.shape
+```
+¿Cuál es la forma del dataset?
+
+5. Separaremos, entonces de forma manual nuestro dataset, y tomaremos los primeros 75 registros para entrenamiento y los últimos 24 para pruebas:
+```python
+x_train = x[:75]
+y_train = y[:75]
+x_test = x[75:]
+y_test = y[75:]
+```
+
+6. Haremos un print para mostrar con cuántos elementos entrenaremos y con cuántos realizaremos nuestras pruebas:
+```python
+print(f"Entrenaremos con {len(x_train)} elementos y probaremos con {len(x_test)} elementos.")
+```
+
+7. Apoyados en el código del aula anterior, vamos a entrenar un modelo Lineal de SVC y lo probaremos utilizando los siguientes comandos:
+```python
+from sklearn.svm import LinearSVC
+from sklearn.metrics import accuracy_score
+
+model = LinearSVC()
+model.fit(x_train,y_train)
+previsiones= model.predict(x_test)
+
+tasa_de_acierto = accuracy_score(y_test, previsiones)
+print(f'La tasa de acierto fue de: {round(tasa_de_acierto*100,2)}%')
+```
+¿Cuánto obtuviste en la exactitud del modelo?
+
+8. SKlearn nos ofrece una manera sencilla de segmentar nuestros datos de entrenamiento y de prueba utilizando la función `train_test_split`. Ella recibe varios parámetros, pero los más importantes son la cantidad de muestras para realizar nuestras pruebas, y el estado de aleatoriedad para que siempre que ejecutemos la separación de datos de prueba y entrenamiento entonces lo haga de la misma manera. Esto va a garantizar la replicabilidad de nuestros resultados siempre que se ejecute el algoritmo. Digita y ejecuta:
+
+```python
+from sklearn.model_selection import train_test_split
+
+SEED=42
+
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.25,random_state=SEED)
+
+model = LinearSVC()
+model.fit(x_train,y_train)
+previsiones= model.predict(x_test)
+
+tasa_de_acierto = accuracy_score(y_test, previsiones)
+print(f'La tasa de acierto fue de: {round(tasa_de_acierto*100,2)}%')
+```
+
+9. Por último, vamos a hacer una estratificación para realizar nuestra separación de las bases de entrenamiento y de prueba, de modo que quede la misma proporción de las clases en ambos casos. Por ejemplo, si en mi dataset de entrenamiento el 30% de las clasificaciones pertenecen a la clase = 1, entonces lo ideal es que mi dataset de pruebas tenga también el 30% de sus clasificaciones como clase = 1. Para ello, configuraremos el parámetro `stratify=y` para que haga la estratificación con base en la clasificación. Digita y ejecuta:
+```python
+from sklearn.model_selection import train_test_split
+
+SEED=42
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.25,random_state=SEED, stratify=y)
+
+model = LinearSVC()
+model.fit(x_train,y_train)
+previsiones= model.predict(x_test)
+
+tasa_de_acierto = accuracy_score(y_test, previsiones)
+print(f'La tasa de acierto fue de: {round(tasa_de_acierto*100,2)}%')
+```
+¿Cuál sería la tasa de acierto si a la variable `SEED` le reasignamos el valor `99`?
+
+###  Lo que aprendimos en el aula
+En esta lección aprendimos a:
+
+- Abrir archivos CSV.
+- Imprimir las primeras observaciones con la función *head*.
+- Redefinir el nombre de las columnas.
+- Utilizar la función *shape* para ver la cantidad de elementos.
+- Separar datos en *Train* y *Test*.
+- Tener control de la generación de números aleatorios.
+- Utilizar la función* value_counts*.
+
+### Proyecto del aula anterior
+
+¿Comenzando en esta etapa? Aquí puedes descargar los archivos del proyecto que hemos avanzado hasta el aula anterior.
+
+[Descargue los archivos en Github](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/blob/aula-3/ML_clasificacion_con_SKLearn.ipynb "Descargue los archivos en Github") o haga clic [aquí](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/archive/refs/heads/aula-3.zip "aquí") para descargarlos directamente.
+
+### Preparando el ambiente
+
+Para que puedas desarrollar tus ejercicios, aquí te dejo la url del [dataset](https://gist.githubusercontent.com/ahcamachod/7c55640f0d65bcbd31bb986bb599180c/raw/1b616e97a8719b3ff245fcdd68eaebdb8da38082/projects.csv "dataset") que utilizaremos durante el aula.
