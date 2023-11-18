@@ -431,3 +431,162 @@ En esta lección aprendimos a:
 Para que puedas desarrollar tus ejercicios, aquí te dejo la url del [dataset](https://gist.githubusercontent.com/ahcamachod/1595316a6b37bf39baac355b081d9c3b/raw/98bc94de744764cef0e67922ddfac2a226ad6a6f/car_prices.csv "dataset") que utilizaremos durante el aula.
 
 
+### Haga lo que hicimos
+
+Llegó la hora de poner en práctica todo lo aprendido en esta lección. Es importante que implementes todo lo que fue visto hasta ahora para continuar con la próxima lección (si ya lo has hecho, ¡excelente!). Implementar lo visto hasta ahora te ayudará a seguir aprendiendo y te dejará más preparado para lo que viene en los próximos videos. En caso de que ya domines esta parte, al final de cada lección podrás descargar el proyecto hasta lo último visto en clase.
+
+1. Finalizaremos nuestro entrenamiento con un nuevo proyecto. Este dataset necesitará pasar por un tratamiento de datos un poco más específico, para adaptarlo a nuestros objetivos. Digita y ejecuta:
+
+```python
+from datetime import datetime
+
+uri = 'https://gist.githubusercontent.com/ahcamachod/1595316a6b37bf39baac355b081d9c3b/raw/98bc94de744764cef0e67922ddfac2a226ad6a6f/car_prices.csv'
+datos = pd.read_csv(uri)
+mapa = {
+        'mileage_per_year':'millas_por_ano',
+        'model_year':'ano_del_modelo',
+        'price':'precio',
+        'sold':'vendido'
+        }
+datos = datos.rename(columns=mapa)
+cambio = {'no':0, 'yes':1}
+datos.vendido = datos.vendido.map(cambio)
+ano_actual = datetime.today().year
+datos['edad_del_modelo'] = ano_actual - datos.ano_del_modelo
+datos['km_por_ano'] = datos.millas_por_ano * 1.60934
+datos = datos.drop(columns=['Unnamed: 0', 'millas_por_ano','ano_del_modelo'], axis=1)
+datos.sample(3)
+```
+
+2. Con nuestro dataset tratado, entonces procederemos a entrenar un modelo SVC. Digita y ejecuta:
+```python
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+
+x= datos[['edad_del_modelo','km_por_ano', 'precio']]
+y= datos.vendido
+
+SEED = 42
+np.random.seed(SEED)
+
+raw_x_train, raw_x_test, y_train, y_test = train_test_split(x,y,test_size=0.25,stratify=y)
+print(f"Entrenaremos con {len(raw_x_train)} elementos y probaremos con {len(raw_x_test)} elementos.")
+
+scaler = StandardScaler()
+scaler.fit(raw_x_train)
+x_train = scaler.transform(raw_x_train)
+x_test = scaler.transform(raw_x_test)
+
+model = SVC()
+model.fit(x_train,y_train)
+previsiones= model.predict(x_test)
+
+tasa_de_acierto = accuracy_score(y_test, previsiones)
+print(f'La tasa de acierto fue de: {round(tasa_de_acierto*100,2)}%')
+```
+
+¿Cuál fue la tasa de acierto de tu modelo?
+
+3. Vamos ahora a generar una baseline utilizando un clasificador Bobo, que como su nombre lo indica, no es muy inteligente, pero es de gran utilidad a la hora de generar un baseline. Inicialmente lo instanciaremos con una estrategia de estratificación. Digita y ejecuta:
+```python
+from sklearn.dummy import DummyClassifier
+
+dummy = DummyClassifier(strategy='stratified')
+dummy.fit(x_train,y_train)
+exactitud = dummy.score(x_test,y_test)*100
+print(f'La exactitud del clasificador Dummy stratified fue: {round(exactitud,2)}%')
+```
+
+4. De igual manera, utilizaremos una estrategia del valor más frecuente:
+```python
+from sklearn.dummy import DummyClassifier
+
+dummy = DummyClassifier(strategy='most_frequent')
+dummy.fit(x_train,y_train)
+exactitud = dummy.score(x_test,y_test)*100
+print(f'La exactitud del clasificador Dummy most_frequent fue: {round(exactitud,2)}%')
+```
+¿Cuál de las dos estrategias generó una mejor baseline para nuestro modelaje?
+
+5. Ahora entrenaremos un nuevo algoritmo de clasificación que nos permite conocer las reglas de decisión del mismo. Este algoritmo se llama precisamente Árbol de Decisión, y el nos ayuda a entender mejor por qué nuestro modelo clasifica de la manera cómo lo hace, considerando cuáles atributos, y cuáles valores. Inicialmente haremos nuestro modelaje con los datos estandarizados.
+```python
+# Usando StandardScaler()
+
+from sklearn.tree import DecisionTreeClassifier
+
+x= datos[['edad_del_modelo','km_por_ano', 'precio']]
+y= datos.vendido
+
+SEED = 42
+np.random.seed(SEED)
+
+raw_x_train, raw_x_test, y_train, y_test = train_test_split(x,y,test_size=0.25,stratify=y)
+print(f"Entrenaremos con {len(raw_x_train)} elementos y probaremos con {len(raw_x_test)} elementos.")
+
+scaler = StandardScaler()
+scaler.fit(raw_x_train)
+x_train = scaler.transform(raw_x_train)
+x_test = scaler.transform(raw_x_test)
+
+model = DecisionTreeClassifier(max_depth=3)
+model.fit(x_train,y_train)
+previsiones= model.predict(x_test)
+
+tasa_de_acierto = accuracy_score(y_test, previsiones)
+print(f'La tasa de acierto fue de: {round(tasa_de_acierto*100,2)}%')
+```
+
+6. Y volveremos a ejecutar nuestro código con los datos sin estandarizar. Digita y ejecuta:
+```python
+# Sin estandarizar
+from sklearn.tree import DecisionTreeClassifier
+
+x= datos[['edad_del_modelo','km_por_ano', 'precio']]
+y= datos.vendido
+
+SEED = 42
+np.random.seed(SEED)
+
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.25,stratify=y)
+print(f"Entrenaremos con {len(x_train)} elementos y probaremos con {len(x_test)} elementos.")
+
+model = DecisionTreeClassifier(max_depth=3)
+model.fit(x_train,y_train)
+previsiones= model.predict(x_test)
+
+tasa_de_acierto = accuracy_score(y_test, previsiones)
+print(f'La tasa de acierto fue de: {round(tasa_de_acierto*100,2)}%')
+```
+
+¿Evalúa el resultado de la exactitud en ambos casos? ¿Qué puedes concluir?
+
+7. Finalmente, vamos a generar un gráfico de nuestro árbol de decisión para analizar por qué el algoritmo tomó las decisiones que tomó:
+```python
+from sklearn.tree import export_graphviz
+import graphviz
+
+features = x.columns
+dot_data = export_graphviz(model, feature_names=features, filled=True, rounded=True, class_names=['No','Sí'])
+grafico = graphviz.Source(dot_data)
+grafico
+```
+
+Si el carro cuesta 61000 dólares, según el estimador utilizado, ¿Se podrá vender?
+
+### Proyecto final
+
+Aquí puedes descargar los archivos del proyecto completo.
+
+[Descargue los archivos en Github](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/blob/proyecto-final/ML_clasificacion_con_SKLearn.ipynb "Descargue los archivos en Github") o haga clic [aquí](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/archive/refs/heads/proyecto-final.zip "aquí") para descargarlos directamente.
+
+### Lo que aprendimos en el aula
+
+En esta lección aprendimos a:
+
+- Utilizar el módulo *datatime*.
+- Crear columnas.
+- Eliminar columnas.
+- Utilizar el módulo *DummyClassifier*.
+- Utilizar el módulo *Graphviz* para generar gráficos.
+- Utilizar el módulo *DecisionTreeClassifier*.
+- Definir parámetros para los gráficos de los árboles de decisión.
