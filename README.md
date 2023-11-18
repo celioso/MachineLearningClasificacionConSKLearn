@@ -359,4 +359,75 @@ En esta lección aprendimos a:
 
 [Descargue los archivos en Github](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/blob/aula-4/ML_clasificacion_con_SKLearn.ipynb "Descargue los archivos en Github") o haga clic [aquí](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/archive/refs/heads/aula-4.zip "aquí") para descargarlos directamente.
 
+### Haga lo que hicimos
+
+Llegó la hora de poner en práctica todo lo aprendido en esta lección. Es importante que implementes todo lo que fue visto hasta ahora para continuar con la próxima lección (si ya lo has hecho, ¡excelente!). Implementar lo visto hasta ahora te ayudará a seguir aprendiendo y te dejará más preparado para lo que viene en los próximos videos. En caso de que ya domines esta parte, al final de cada lección podrás descargar el proyecto hasta lo último visto en clase.
+
+1. El resultado de la exactitud no es bueno dado que nos encontramos ante un dataset cuyos datos presentan un patrón no lineal. Para ello debemos entonces utilizar un estimador mas inteligente llamado SVC. Adicionalmente, para mejorar la exactitud de nuestro modelo debemos llevar nuestros datos a la misma escala, entonces podemos utilizar `StandardScaler()` de SKLearn. Digita y ejecuta la siguiente celda:
+
+```python
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+
+x= datos[['horas_esperadas','precio']]
+y= datos.finalizado
+
+SEED = 42
+np.random.seed(SEED)
+
+raw_x_train, raw_x_test, y_train, y_test = train_test_split(x,y,test_size=0.25,stratify=y)
+print(f"Entrenaremos con {len(x_train)} elementos y probaremos con {len(x_test)} elementos.")
+
+scaler = StandardScaler()
+scaler.fit(raw_x_train)
+x_train = scaler.transform(raw_x_train)
+x_test = scaler.transform(raw_x_test)
+
+model = SVC()
+model.fit(x_train,y_train)
+previsiones= model.predict(x_test)
+
+data_x = x_test[:,0]
+data_y = x_test[:,1]
+
+x_min = data_x.min()
+x_max = data_x.max()
+y_min = data_y.min()
+y_max = data_y.max()
+
+pixels = 100
+eje_x = np.arange(x_min, x_max, (x_max-x_min)/pixels)
+eje_y = np.arange(y_min, y_max, (y_max-y_min)/pixels)
+
+xx, yy = np.meshgrid(eje_x, eje_y)
+puntos = np.c_[xx.ravel(), yy.ravel()]
+Z = model.predict(puntos)
+Z = Z.reshape(xx.shape)
+
+plt.contourf(xx, yy, Z, alpha=0.3)
+plt.scatter(data_x, data_y, c=y_test, s=1)
+
+tasa_de_acierto = accuracy_score(y_test, previsiones)
+print(f'La tasa de acierto fue de: {round(tasa_de_acierto*100,2)}%')
+```
+¿Qué puedes concluir al observar el gráfico generado?¿Qué tal si cambias el valor de la variable `SEED` para ver qué sucede con la exactitud de nuestro modelo?
+
+### Lo que aprendimos en el aula
+
+En esta lección aprendimos a:
+
+- Utilizar el módulo Support Vector Machine.
+- Controlar la parte aleatoria de la función *SVC*.
+- Utilizar el módulo *StandardScaler*.
+
+### Proyecto del aula anterior
+
+¿Comenzando en esta etapa? Aquí puedes descargar los archivos del proyecto que hemos avanzado hasta el aula anterior.
+
+[Descargue los archivos en Github](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/blob/aula-5/ML_clasificacion_con_SKLearn.ipynb "Descargue los archivos en Github") o haga clic [aquí](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/archive/refs/heads/aula-5.zip "aquí") para descargarlos directamente.
+
+### Preparando el ambiente
+
+Para que puedas desarrollar tus ejercicios, aquí te dejo la url del [dataset](https://gist.githubusercontent.com/ahcamachod/1595316a6b37bf39baac355b081d9c3b/raw/98bc94de744764cef0e67922ddfac2a226ad6a6f/car_prices.csv "dataset") que utilizaremos durante el aula.
+
 
