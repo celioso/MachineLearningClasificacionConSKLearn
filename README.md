@@ -237,3 +237,126 @@ En esta lección aprendimos a:
 ### Preparando el ambiente
 
 Para que puedas desarrollar tus ejercicios, aquí te dejo la url del [dataset](https://gist.githubusercontent.com/ahcamachod/7c55640f0d65bcbd31bb986bb599180c/raw/1b616e97a8719b3ff245fcdd68eaebdb8da38082/projects.csv "dataset") que utilizaremos durante el aula.
+
+### Haga lo que hicimos
+
+Llegó la hora de poner en práctica todo lo aprendido en esta lección. Es importante que implementes todo lo que fue visto hasta ahora para continuar con la próxima lección (si ya lo has hecho, ¡excelente!). Implementar lo visto hasta ahora te ayudará a seguir aprendiendo y te dejará más preparado para lo que viene en los próximos videos. En caso de que ya domines esta parte, al final de cada lección podrás descargar el proyecto hasta lo último visto en clase.
+
+1. Continuaremos con otro proyecto. Vamos a importar nuestro dataset directamente desde internet. Digita y ejecuta:
+
+```python
+import pandas as pd
+uri = 'https://gist.githubusercontent.com/ahcamachod/7c55640f0d65bcbd31bb986bb599180c/raw/1b616e97a8719b3ff245fcdd68eaebdb8da38082/projects.csv'
+
+datos = pd.read_csv(uri)
+datos.head()
+```
+
+2. Renombraremos las columnas, y tomaremos una muestra de 3 filas:
+```python
+mapa = {
+        'unfinished':'no_finalizado',
+        'expected_hours':'horas_esperadas',
+        'price':'precio'
+        }
+
+datos = datos.rename(columns=mapa)
+datos.sample(3)
+```
+
+3. Vamos a cambiar la columna `'no_finalizado'` porque no es auto-intuitiva. Entonces crearemos un nuevo atributo que llamaremos `'finalizado'` y allí le mapearemos este cambio. Digita y ejecuta:
+```python
+cambio = {1:0, 0:1}
+
+datos['finalizado'] = datos.no_finalizado.map(cambio)
+```
+
+4. Utilizaremos seabornpara graficar nuestro dataset:
+```python
+import seaborn as sns
+sns.scatterplot(x='horas_esperadas', y='precio', data=datos)
+```
+
+5. Modificaremos el código anterior, introduciendo una nueva dimensión al gráfico a través del color. Utilizaremos el parámetro `hue`:
+```python
+sns.scatterplot(x='horas_esperadas', y='precio', hue='finalizado', data=datos)
+```
+
+6. Vamos a realizar un gráfico relativo en el cuál se generarán dos gráficas que nos permitiran visualizar de manera separada las 2 clases:
+```python
+sns.relplot(x='horas_esperadas', y='precio', hue='finalizado', data=datos, col='finalizado')
+```
+
+7. Vamos a modelar con `LinearSVC` y ver el comportamiento de nuestro modelo. Igualmente, estableceremos el `random_state` para todo el runtime utilizando numpy. De esta manera no tendremos que colocar un estado de aleatoriedad cada vez que instanciamos algún modelo o realicemos la separación entre bases de entrenamiento y de prueba:
+
+```python
+import numpy as np
+
+x= datos[['horas_esperadas','precio']]
+y= datos.finalizado
+
+SEED = 42
+np.random.seed(SEED)
+
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.25,stratify=y)
+print(f"Entrenaremos con {len(x_train)} elementos y probaremos con {len(x_test)} elementos.")
+
+model = LinearSVC()
+model.fit(x_train,y_train)
+previsiones= model.predict(x_test)
+
+tasa_de_acierto = accuracy_score(y_test, previsiones)
+print(f'La tasa de acierto fue de: {round(tasa_de_acierto*100,2)}%')
+```
+
+¿Cuál fue la exactitud de tu modelo?
+
+8. Crearemos una baseline pasando como previsiones un array que contiene únicamente 1´s y calcularemos la exactitud de nuestro modelo:
+```python
+base_previsiones = np.ones(540)
+tasa_de_acierto = accuracy_score(y_test, base_previsiones)
+print(f'La tasa de acierto fue de: {round(tasa_de_acierto*100,2)}%')
+```
+
+9. Ahora contamos con una referencia para poder comparar nuestro modelo. Sin embargo, nos surge la pregunta de por qué nuestro modelo está clasificando de la manera como está clasificando. ¿Será que hay una forma de entrenar nuestro modelo con todos los puntos existentes en el gráfico para poder observar el área donde el modelo clasifica un tipo de clase y el área donde clasifica con el otro tipo de clase? La respuesta es sí, y para ello utilizaremos `numpy` y `matplotlib`:
+```python
+import matplotlib.pyplot as plt
+
+x_min = x_test.horas_esperadas.min()
+x_max = x_test.horas_esperadas.max()
+y_min = x_test.precio.min()
+y_max = x_test.precio.max()
+pixels = 100
+eje_x = np.arange(x_min, x_max, (x_max-x_min)/pixels)
+eje_y = np.arange(y_min, y_max, (y_max-y_min)/pixels)
+xx, yy = np.meshgrid(eje_x, eje_y)
+puntos = np.c_[xx.ravel(), yy.ravel()]
+Z = model.predict(puntos)
+Z = Z.reshape(xx.shape)
+
+plt.contourf(xx, yy, Z, alpha=0.3)
+plt.scatter(x_test.horas_esperadas, x_test.precio, c=y_test, s=1)
+```
+
+¿Qué puedes concluir al observar el gráfico generado?
+
+### Lo que aprendimos en el aula
+
+En esta lección aprendimos a:
+
+- Cambiar valores.
+- Usar la biblioteca **Seaborn**.
+- Generar un gráfico con datos de un CSV.
+- Definir colores en los gráficos.
+- Separar los gráficos por categoría.
+- Crear un modelo `baseline`.
+- Capturar los valores mínimos y máximos de una variable.
+- Utilizar la función arrange de la biblioteca **NumPy**.
+
+### Proyecto del aula anterior
+
+¿Comenzando en esta etapa? Aquí puedes descargar los archivos del proyecto que hemos avanzado hasta el aula anterior.
+
+[Descargue los archivos en Github](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/blob/aula-4/ML_clasificacion_con_SKLearn.ipynb "Descargue los archivos en Github") o haga clic [aquí](https://github.com/alura-es-cursos/1918-machine-learning-clasificacion-con-sklearn/archive/refs/heads/aula-4.zip "aquí") para descargarlos directamente.
+
+
